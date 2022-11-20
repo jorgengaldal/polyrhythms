@@ -1,6 +1,5 @@
 """
 TODO: Rewrite with OOP (more dynamic with default values for functions)
-TODO: Fix border control
 """
 
 
@@ -18,6 +17,12 @@ def create_base(meter_a, meter_b,
                 resolution=20,
                 multiplier=4):
     """Creates a visual of a polyrhythm of meter_a against meter_b.
+    args:
+    meter_a: horisontal meter
+    meter_b: vertical meter
+    resolution: size of ball
+    border: border size in pixels
+    multiplier: How many balls will fit inside one division (*meter* number of divisions in a beat)
     """
     image_size = (2*border+resolution*(meter_a*multiplier+1),
                   2*border+resolution*(meter_b*multiplier+1))
@@ -36,6 +41,12 @@ def create_base(meter_a, meter_b,
 def create_frame(base_img,
                  pos,
                  resolution=20):
+    """Creates single frame
+    args:
+    base_img: image to make frame from
+    pos: current posision of point
+    resolution: size of point
+    """
     new = base_img.copy()
     canvas = ImageDraw.Draw(new)
     # Bottom right pos of point rectangle
@@ -53,10 +64,17 @@ def create_frames(base_img,
                   multiplier=4,
                   frame_dir="frames",
                   file_extension="png"):
-    """TODO: Add Docstring
+    """TODO: Complete docstring
     args:
-    resolution - size of ball
-    multiplier - How many ball will fit inside one meter
+    base_img: image to create frames from
+    duration: number of seconds the video will last
+    fps: frames per second
+    bpm: beats per minute
+    resolution: size of ball
+    border: border size in pixels
+    multiplier: How many balls will fit inside one division (*meter* number of divisions in a beat)
+    frame_dir: directory to save frames to
+    file_extension: file extension for frames
     """
 
     file_base = f"{bpm}BPM_"
@@ -65,7 +83,7 @@ def create_frames(base_img,
 
     reference_beat = min(base_img.size)
     velocity_per_second = (reference_beat) / (bpm / 60) 
-    velocity = int(velocity_per_second / fps) # TODO: Fix formula
+    velocity = int(velocity_per_second / fps) 
     print(velocity)
 
     pos = [border, border]
@@ -87,6 +105,13 @@ def move_point(base_img,
               resolution):
     """
     Does in-place modification of pos.
+    args:
+    base_img: image from which the size is to be calculated
+    pos: list of point's position
+    direction: list of the point's current moving direction
+    velocity: Number of pixels to move
+    border: border size in pixels
+    resolution: size of ball
     """
     
     for i in range(2):
