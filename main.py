@@ -1,7 +1,7 @@
 """
 TODO: Rewrite with OOP (more dynamic with default values for functions)
+TODO: Fix border control
 """
-
 
 
 from PIL import Image
@@ -10,12 +10,13 @@ from PIL import ImageDraw
 
 import glob
 import cv2 as cv
+import os
 
 
 def create_base(meter_a, meter_b,
-                border = 10, 
-                resolution = 20, 
-                multiplier = 4):
+                border=10,
+                resolution=20,
+                multiplier=4):
     """Creates a visual of a polyrhythm of meter_a against meter_b.
     """
     image_size = (2*border+resolution*(meter_a*multiplier+1),
@@ -32,9 +33,9 @@ def create_base(meter_a, meter_b,
     return img
 
 
-def create_frame(base_img, 
-                 pos, 
-                 resolution = 20):
+def create_frame(base_img,
+                 pos,
+                 resolution=20):
     new = base_img.copy()
     canvas = ImageDraw.Draw(new)
     # Bottom right pos of point rectangle
@@ -44,45 +45,81 @@ def create_frame(base_img,
 
 
 def create_frames(base_img,
-                  duration = 30,
-                  fps = 30,
-                  bpm = 60,
-                  resolution = 20,
-                  border = 10,
-                  multiplier = 4,
-                  frame_dir = "frames",
-                  file_extension = "png"):
+                  duration=30,
+                  fps=30,
+                  bpm=60,
+                  resolution=20,
+                  border=10,
+                  multiplier=4,
+                  frame_dir="frames",
+                  file_extension="png"):
     """TODO: Add Docstring
     args:
     resolution - size of ball
     multiplier - How many ball will fit inside one meter
     """
-    
+
     file_base = f"{bpm}BPM_"
 
     frames = duration * fps
 
-    velocity = (resolution*multiplier*(bpm/60))/fps  # TODO: Fix formula
+    reference_beat = min(base_img.size)
+    velocity_per_second = (reference_beat) / (bpm / 60) 
+    velocity = int(velocity_per_second / fps) # TODO: Fix formula
+    print(velocity)
 
     pos = [border, border]
     direction = [1, 1]
 
     for frame in range(frames):
         file_name = f"{frame_dir}\{file_base}{frame}.{file_extension}"
-        create_frame(base_img, pos).save(file_name)
+        create_frame(base_img, pos, resolution).save(file_name)
         print(f"Created frame {frame} of {frames} ({file_name})")
 
-        for i in range(2):
-            pos[i] += velocity*direction[i]
-
-            # Checks if point hits border
-            if pos[i] <= border or pos[i] + resolution >= (base_img.size[i] - border):
-                direction[i] = -direction[i]
+        move_point(base_img, pos, direction, velocity, border, resolution)
 
 
-def create_video(img_dir="frames", 
-                 destination="output.avi", 
-                 fps=30, 
+def move_point(base_img,
+              pos,
+              direction,
+              velocity,
+              border,
+              resolution):
+    """
+    Does in-place modification of pos.
+    """
+    
+    for i in range(2):
+        wanted_move = velocity * direction[i]
+
+        direction[i] *= -1  # Assumes border hit
+
+        # Checks first (left/top) border hit
+        if (pos[i] + wanted_move) <= border:
+            print("First border hit")
+            to_border_move = pos[i] - border
+            from_border_move = (-wanted_move) - to_border_move
+            final_move = -(to_border_move - from_border_move)
+            print(f"{pos=}, {to_border_move=}, {wanted_move=}")
+        
+        # Checks last (right/bottom) border hit
+        elif (pos[i] + wanted_move + resolution) >= (base_img.size[i] - border):
+            print("Last border hit")
+            to_border_move = (base_img.size[i] - border) - (pos[i] + resolution)
+            from_border_move = wanted_move - to_border_move
+            final_move = to_border_move - from_border_move
+
+        # No border hit
+        else:
+            final_move = wanted_move
+            direction[i] *= -1  # Reverts border hit assumption
+
+        pos[i] += final_move
+
+
+def create_video(img_dir="frames",
+                 destination="output.avi",
+                 fps=30,
                  fourcc="DIVX"):
     """ Creates a video with OpenCV and returns path to video
     args:
@@ -95,7 +132,7 @@ def create_video(img_dir="frames",
     images = []
 
     fourcc_object = cv.VideoWriter_fourcc(*fourcc)
-    for filename in glob.iglob(f"{img_dir}/*"):
+    for filename in sorted(glob.glob(f"{img_dir}/*"), key=os.path.getmtime):
         img = cv.imread(filename)
         images.append(img)
 
@@ -108,19 +145,18 @@ def create_video(img_dir="frames",
         output.write(im)
 
     output.release()
-    
+
     print(f"Video written to {destination}")
 
     return destination
 
 
 if __name__ == "__main__":
-    # meter_a = int(input("Meter A: "))
-    # meter_b = int(input("Meter B: "))
+    meter_a = int(input("Meter A: "))
+    meter_b = int(input("Meter B: "))
 
-    # img = create_base(meter_a, meter_b)
+    img = create_base(meter_a, meter_b)
 
-    # create_frames(img)
-
+    create_frames(img)
 
     create_video()
