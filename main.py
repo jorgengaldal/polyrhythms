@@ -2,6 +2,7 @@
 TODO: Rewrite with OOP (more dynamic with default values for functions)
 """
 
+from utils import clear_directory
 
 from PIL import Image
 from PIL import ImageColor
@@ -70,12 +71,18 @@ class PolyRhythmVisual:
               img_extension="png",
               codec="DIVX"):
         
+        
+        clear_directory(self.frames_directory)
+
         self.frames_directory = frames_directory
         self.destination = destination
         self.img_extension = img_extension
         self.codec = codec
 
+
+
         print(f"Creating video and saving to {destination}")
+        self._create_frames()
         self._create_video()        
         print(f"Video written to {self.destination}")
 
@@ -191,6 +198,7 @@ class PolyRhythmVisual:
             output.write(im)
 
         output.release()
+
 
 if __name__ == "__main__":
     meter_a = int(input("Meter A: "))
