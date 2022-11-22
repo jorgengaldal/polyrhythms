@@ -21,13 +21,9 @@ class PolyRhythmVisual:
                  multiplier = 1,
                  duration = 15,
                  fps = 30,
-                 bpm = 60,
-                 frames_directory="frames",
-                 destination="output.avi",
-                 img_extension="png",
-                 codec="DIVX"):
+                 bpm = 60):
         """
-        TODO Add docstring
+        TODO Fix docstring
         Creates a visual of a polyrhythm of meter_a against meter_b.
 
         args:
@@ -52,11 +48,14 @@ class PolyRhythmVisual:
         self.duration = duration
         self.fps = fps
         self.bpm = bpm
-        self.frames_directory = frames_directory
-        self.destination = destination
-        self.img_extension = img_extension
-        self.codec = codec
-        
+
+        # Initiate variable for video (NOTE Consider removing)
+        self.frames_directory = None
+        self.destination = None
+        self.img_extension = None
+        self.codec = None
+
+        # Calculate extra properties
         self.size = self._calculate_size()
         self.velocity = self._calculate_velocity()
         self.pos = [self.border, self.border]
@@ -64,6 +63,21 @@ class PolyRhythmVisual:
         self.frames = self.duration * self.fps
 
         self.base = self._create_base()
+
+    def video(self,
+              frames_directory="frames",
+              destination="output.avi",
+              img_extension="png",
+              codec="DIVX"):
+        
+        self.frames_directory = frames_directory
+        self.destination = destination
+        self.img_extension = img_extension
+        self.codec = codec
+
+        print(f"Creating video and saving to {destination}")
+        self._create_video()        
+        print(f"Video written to {self.destination}")
 
 
     @classmethod
@@ -178,17 +192,9 @@ class PolyRhythmVisual:
 
         output.release()
 
-        print(f"Video written to {self.destination}")
-
-        # return destination
-
-
 if __name__ == "__main__":
     meter_a = int(input("Meter A: "))
     meter_b = int(input("Meter B: "))
 
     visual = PolyRhythmVisual(meter_a, meter_b)
-
-    visual._create_frames()
-
-    visual._create_video()
+    visual.video()
