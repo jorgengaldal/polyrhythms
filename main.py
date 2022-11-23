@@ -1,5 +1,8 @@
 """
-TODO: Rewrite with OOP (more dynamic with default values for functions)
+TODO: Include sound (one sound for meter_a and one for meter_b)
+TODO: Differentiate the two types of hits (top-bottom and left-right) with colors
+TODO: Do some styling
+TODO (maybe): Remake with JavaScript and HTML5 canvas deployed on the web?
 """
 
 from utils import clear_directory
@@ -79,13 +82,10 @@ class PolyRhythmVisual:
         self.img_extension = img_extension
         self.codec = codec
 
-
-
         print(f"Creating video and saving to {destination}")
         self._create_frames()
         self._create_video()        
         print(f"Video written to {self.destination}")
-
 
     @classmethod
     def one_loop(self):
