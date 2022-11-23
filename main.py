@@ -107,7 +107,8 @@ class PolyRhythmVisual:
 
     def _create_base(self):
         """
-        TODO Add docstring
+        TODO: Add docstring
+        TODO: Add colors: separate color for top/bottom and left/right
         """
 
         img = Image.new("RGB", self.size, "#FFFFFF")
